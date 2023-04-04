@@ -63,7 +63,7 @@ async function GetChangedFiles(targetBranch: string) {
 async function reviewFile(fileName: string) {
   console.log(`Start reviewing ${fileName} ...`);
 
-  const patch = await git.diff([targetBranch, fileName]);
+  const patch = await git.diff([targetBranch, '--', fileName]);
 
   const prompt = `
           Act as a code reviewer of a Pull Request, providing feedback on the code changes below.
@@ -99,6 +99,12 @@ async function reviewFile(fileName: string) {
   });
 
   const gptFeedback = await response.json() as any;
+
+  if (gptFeedback.error) {
+    console.error(gptFeedback.error.message);
+    return;
+  }
+
   const choices = gptFeedback.choices
 
   if (choices && choices.length > 0) {
